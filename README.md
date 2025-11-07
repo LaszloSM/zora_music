@@ -158,27 +158,6 @@ npm run build
 npm run preview
 ```
 
-## Solución de Problemas
-
-### El backend no inicia
-- Verifica que el entorno virtual esté activado
-- Asegúrate de haber instalado todas las dependencias: `pip install -r requirements.txt`
-- Verifica que las migraciones estén aplicadas: `python manage.py migrate`
-
-### El frontend no inicia
-- Elimina la carpeta `node_modules` y ejecuta `npm install` de nuevo
-- Verifica que Node.js esté instalado: `node --version`
-- Verifica que el puerto 5173 no esté en uso
-
-### Errores de CORS
-- Asegúrate de que el frontend esté corriendo en `http://localhost:5173`
-- Verifica la configuración de CORS en `backend/backend/settings.py`
-
-### La sesión se cierra al recargar
-- Verifica que el navegador permita cookies
-- Abre la consola del navegador (F12) y revisa la pestaña de Application/Storage
-- Asegúrate de que localStorage tenga los tokens guardados
-
 ## Licencia
 
 Este proyecto es privado y confidencial.
