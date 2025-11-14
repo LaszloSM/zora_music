@@ -1,10 +1,10 @@
 from django.db.models import Q
-from django.http import FileResponse, Http404
-from rest_framework import generics, permissions
-from rest_framework.decorators import api_view
+from django.http import FileResponse, Http404, StreamingHttpResponse
+from rest_framework import generics, permissions, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .models import Cancion, Genero
-from .serializers import CancionSerializer, GeneroSerializer
+from .models import Cancion, Genero, CancionFavorita, HistorialReproduccion
+from .serializers import CancionSerializer, GeneroSerializer, CancionFavoritaSerializer, HistorialReproduccionSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
@@ -44,25 +44,77 @@ def buscar_canciones(request):
     if q:
         queryset = queryset.filter(
             Q(title__icontains=q) | 
-            Q(album__icontains=q) | 
+            Q(album__title__icontains=q) | 
             Q(uploaded_by__first_name__icontains=q) |
             Q(uploaded_by__last_name__icontains=q) |
             Q(genre__name__icontains=q)
         )
-    serializer = CancionSerializer(queryset, many=True)
+    serializer = CancionSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
 
 
 @api_view(['GET'])
 def transmitir_cancion(request, pk):
-    """Devuelve el archivo de audio; incrementa el contador de reproducciones."""
+    """Devuelve el archivo de audio con soporte para solicitudes parciales (Range)."""
     song = get_object_or_404(Cancion, pk=pk)
     if not song.file:
         raise Http404('Archivo de audio no encontrado')
-    song.play_count = (song.play_count or 0) + 1
-    song.save(update_fields=['play_count'])
-    response = FileResponse(song.file.open('rb'), content_type='audio/mpeg')
-    response['Content-Length'] = song.file.size
+
+    audio_file = song.file.open('rb')
+    file_size = song.file.size
+    range_header = request.headers.get('Range')
+    response = None
+
+    should_increment_playcount = True
+
+    if range_header:
+        # Formato esperado: "bytes=start-end"
+        try:
+            range_value = range_header.strip().lower()
+            units, _, range_spec = range_value.partition('=')
+            if units != 'bytes':
+                raise ValueError('Unidad de rango no soportada')
+            start_str, _, end_str = range_spec.partition('-')
+            start = int(start_str) if start_str else 0
+            end = int(end_str) if end_str else file_size - 1
+            end = min(end, file_size - 1)
+            if start > end or start < 0:
+                raise ValueError('Rango inválido')
+        except (ValueError, IndexError):
+            audio_file.close()
+            response_416 = Response(status=416)
+            response_416['Content-Range'] = f'bytes */{file_size}'
+            return response_416
+
+        chunk_size = (end - start) + 1
+        should_increment_playcount = start == 0
+        audio_file.seek(start)
+
+        def file_iterator(file_obj, length):
+            remaining = length
+            chunk = 1024 * 64
+            try:
+                while remaining > 0:
+                    read_length = min(chunk, remaining)
+                    data = file_obj.read(read_length)
+                    if not data:
+                        break
+                    remaining -= len(data)
+                    yield data
+            finally:
+                file_obj.close()
+
+        response = StreamingHttpResponse(file_iterator(audio_file, chunk_size), status=206, content_type='audio/mpeg')
+        response['Content-Range'] = f'bytes {start}-{end}/{file_size}'
+        response['Content-Length'] = str(chunk_size)
+    else:
+        response = FileResponse(audio_file, content_type='audio/mpeg')
+        response['Content-Length'] = str(file_size)
+
+    response['Accept-Ranges'] = 'bytes'
+    if should_increment_playcount:
+        song.play_count = (song.play_count or 0) + 1
+        song.save(update_fields=['play_count'])
     return response
 
 
@@ -70,3 +122,103 @@ class GeneroListView(generics.ListAPIView):
     queryset = Genero.objects.all()
     serializer_class = GeneroSerializer
     permission_classes = [permissions.AllowAny]
+
+
+# ========== ENDPOINTS DE FAVORITOS ==========
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def listar_favoritos(request):
+    """Lista todas las canciones favoritas del usuario autenticado"""
+    favoritos = CancionFavorita.objects.filter(usuario=request.user).select_related('cancion')
+    canciones = [fav.cancion for fav in favoritos]
+    serializer = CancionSerializer(canciones, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def agregar_favorito(request, cancion_id):
+    """Agrega una canción a favoritos"""
+    cancion = get_object_or_404(Cancion, pk=cancion_id)
+    favorito, created = CancionFavorita.objects.get_or_create(
+        usuario=request.user,
+        cancion=cancion
+    )
+    if created:
+        return Response({'message': 'Canción agregada a favoritos'}, status=status.HTTP_201_CREATED)
+    return Response({'message': 'La canción ya está en favoritos'}, status=status.HTTP_200_OK)
+
+
+@api_view(['DELETE'])
+@permission_classes([permissions.IsAuthenticated])
+def quitar_favorito(request, cancion_id):
+    """Quita una canción de favoritos"""
+    try:
+        favorito = CancionFavorita.objects.get(usuario=request.user, cancion_id=cancion_id)
+        favorito.delete()
+        return Response({'message': 'Canción quitada de favoritos'}, status=status.HTTP_200_OK)
+    except CancionFavorita.DoesNotExist:
+        return Response({'message': 'La canción no está en favoritos'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def verificar_favorito(request, cancion_id):
+    """Verifica si una canción está en favoritos"""
+    es_favorito = CancionFavorita.objects.filter(usuario=request.user, cancion_id=cancion_id).exists()
+    return Response({'is_favorite': es_favorito})
+
+
+# ========== ENDPOINTS DE HISTORIAL ==========
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def listar_historial(request):
+    """Lista el historial de reproducciones del usuario (últimas 50)"""
+    historial = HistorialReproduccion.objects.filter(usuario=request.user).select_related('cancion')[:50]
+    # Obtener canciones únicas (sin duplicados)
+    canciones_ids = []
+    canciones_unicas = []
+    for item in historial:
+        if item.cancion.id not in canciones_ids:
+            canciones_ids.append(item.cancion.id)
+            canciones_unicas.append(item.cancion)
+    
+    serializer = CancionSerializer(canciones_unicas, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def registrar_reproduccion(request, cancion_id):
+    """Registra una reproducción en el historial"""
+    cancion = get_object_or_404(Cancion, pk=cancion_id)
+    HistorialReproduccion.objects.create(
+        usuario=request.user,
+        cancion=cancion
+    )
+    return Response({'message': 'Reproducción registrada'}, status=status.HTTP_201_CREATED)
+
+
+# ========== ENDPOINTS DE ESTADÍSTICAS EN TIEMPO CASI REAL ==========
+
+@api_view(['GET'])
+def reproducciones_cancion(request, pk: int):
+    """Devuelve el contador de reproducciones de una canción."""
+    song = get_object_or_404(Cancion, pk=pk)
+    return Response({'id': song.id, 'play_count': song.play_count})
+
+
+@api_view(['GET'])
+def reproducciones_multiples(request):
+    """Devuelve contadores para múltiples canciones (?ids=1,2,3)."""
+    ids_param = request.query_params.get('ids', '')
+    try:
+        ids = [int(x) for x in ids_param.split(',') if x.strip().isdigit()]
+    except Exception:
+        ids = []
+    if not ids:
+        return Response({'detail': 'Parámetro ids requerido'}, status=status.HTTP_400_BAD_REQUEST)
+    qs = Cancion.objects.filter(id__in=ids).values('id', 'play_count')
+    return Response({'results': list(qs)})

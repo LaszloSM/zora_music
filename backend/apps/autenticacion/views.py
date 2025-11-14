@@ -11,6 +11,9 @@ from django.contrib.auth import authenticate
 from .models import Usuario, Rol, UsuarioRol
 from .serializers import RegisterSerializer, UsuarioSerializer, RolSerializer, UsuarioRolSerializer
 from .permissions import IsAdminRole
+from django.conf import settings
+import json
+from urllib import request as urlrequest, parse as urlparse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -125,8 +128,36 @@ class RegisterView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         try:
+            data = request.data.copy()
+            # Validar CAPTCHA si está habilitado
+            if getattr(settings, 'RECAPTCHA_ENABLED', False):
+                captcha_token = data.get('captcha_token') or data.get('recaptchaToken')
+                if not captcha_token:
+                    return Response({'detail': 'Validación CAPTCHA requerida.'}, status=status.HTTP_400_BAD_REQUEST)
+
+                payload = {
+                    'secret': settings.RECAPTCHA_SECRET_KEY,
+                    'response': captcha_token,
+                    'remoteip': request.META.get('REMOTE_ADDR'),
+                }
+                verify_req = urlrequest.Request(
+                    'https://www.google.com/recaptcha/api/siteverify',
+                    data=urlparse.urlencode(payload).encode('utf-8'),
+                    headers={'Content-Type': 'application/x-www-form-urlencoded'}
+                )
+                with urlrequest.urlopen(verify_req, timeout=10) as resp:
+                    body = resp.read().decode('utf-8')
+                    result = json.loads(body)
+                if not result.get('success'):
+                    return Response({'detail': 'CAPTCHA inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Eliminar campos de captcha antes de validar serializer
+                for k in ('captcha_token', 'recaptchaToken'):
+                    if k in data:
+                        data.pop(k)
+
             # Validar y crear usuario
-            serializer = self.get_serializer(data=request.data)
+            serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
             user = serializer.save()
 
@@ -137,6 +168,15 @@ class RegisterView(generics.CreateAPIView):
             # Ajustar tiempo de expiración (opcional)
             # access_token.set_exp(lifetime=timedelta(hours=1))
 
+            # Mapear los roles del backend a los roles del frontend
+            role_mapping = {
+                'Administrador': 'admin',
+                'Artista': 'artist',
+                'Oyente': 'listener'
+            }
+            
+            role = role_mapping.get(user.rol.nombre, 'listener') if user.rol else 'listener'
+            
             response_data = {
                 'refresh': str(refresh),
                 'access': str(access_token),
@@ -146,7 +186,8 @@ class RegisterView(generics.CreateAPIView):
                     'email': user.email,
                     'nombres': user.nombres,
                     'apellidos': user.apellidos,
-                    'role': 'listener'  # Por defecto todos son oyentes
+                    'nombre_artistico': user.nombre_artistico,
+                    'role': role
                 }
             }
 
@@ -200,6 +241,27 @@ class UsuarioRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UsuarioSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
 
+# ADMIN: Cambiar contraseña de otro usuario
+class AdminSetUserPasswordView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminRole]
+
+    def post(self, request, pk: int):
+        try:
+            new_password = request.data.get('new_password')
+            if not new_password or not isinstance(new_password, str) or len(new_password) < 6:
+                return Response({'detail': 'Nueva contraseña inválida'}, status=400)
+
+            try:
+                user = Usuario.objects.get(pk=pk)
+            except Usuario.DoesNotExist:
+                return Response({'detail': 'Usuario no encontrado'}, status=404)
+
+            user.set_password(new_password)
+            user.save()
+            return Response({'detail': 'Contraseña actualizada correctamente'}, status=200)
+        except Exception as e:
+            return Response({'detail': f'Error interno: {str(e)}'}, status=500)
+
 # INICIAR SESION
 class CookieLoginView(APIView):
     def post(self, request):
@@ -244,6 +306,7 @@ class CookieLoginView(APIView):
                 "email": user.email,
                 "nombres": user.nombres,
                 "apellidos": user.apellidos,
+                "nombre_artistico": user.nombre_artistico,
                 "role": role,
             }
         })
