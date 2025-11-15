@@ -1,6 +1,8 @@
 import { User, Song, Playlist, Artist } from '../types';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+// Base URL configurable via environment variable for deployment.
+// Define VITE_API_BASE_URL in Vercel project settings or .env file.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 const fetchAPI = async (endpoint: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('accessToken');
