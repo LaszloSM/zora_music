@@ -32,7 +32,14 @@ export function RegisterForm() {
         setError('Por favor completa el CAPTCHA.');
         return;
       }
-      await register({ ...formData, captcha_token: captchaToken || undefined });
+      await register({ 
+        email: formData.email,
+        password: formData.password,
+        nombres: formData.nombres,
+        apellidos: formData.apellidos,
+        role: 'listener',
+        captcha_token: captchaToken || undefined
+      });
       // Redirigir o mostrar mensaje de éxito
     } catch (err) {
       setError('Error al registrar. Por favor, verifica los datos.');

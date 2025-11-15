@@ -1,4 +1,4 @@
-import { Search, Bell, LogOut, ChevronDown, User as UserIcon, Settings } from 'lucide-react';
+import { Search, Bell, LogOut, ChevronDown, Settings } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import {
@@ -17,11 +17,10 @@ interface HeaderProps {
   onLogout: () => void;
   onSearch?: (query: string) => void;
   onSearchClick?: () => void;
-  onProfileClick?: () => void;
   onSettingsClick?: () => void;
 }
 
-export function Header({ user, onLogout, onSearch, onSearchClick, onProfileClick, onSettingsClick }: HeaderProps) {
+export function Header({ user, onLogout, onSearch, onSearchClick, onSettingsClick }: HeaderProps) {
   const getRoleLabel = (role: string) => {
     switch (role.toLowerCase()) {
       case 'admin':
@@ -85,7 +84,6 @@ export function Header({ user, onLogout, onSearch, onSearchClick, onProfileClick
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 
-            sideOffset={8} 
             align="end" 
             className="w-64 rounded-xl border border-[#2c5f7d]/40 bg-[#0f1e30]/95 p-3 shadow-2xl shadow-[#0b2740]/30 animate-in fade-in slide-in-from-top-2 duration-200 backdrop-blur-lg"
           >

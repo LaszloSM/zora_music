@@ -61,7 +61,8 @@ export default function App() {
   const [favorites, setFavorites] = useState<Song[]>([]);
   const [isLoadingSongs, setIsLoadingSongs] = useState(true);
   const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(true);
-  const [isLoadingFavorites, setIsLoadingFavorites] = useState(true);
+  // Prefijo _ para evitar warning TS6133: valor no usado aún
+  const [_isLoadingFavorites, setIsLoadingFavorites] = useState(true);
   const [isShuffled, setIsShuffled] = useState(false);
   const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
   const [originalQueue, setOriginalQueue] = useState<Song[]>([]);

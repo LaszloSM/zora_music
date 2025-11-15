@@ -94,12 +94,15 @@ DropdownMenuContent.displayName = "DropdownMenuContent";
 
 const DropdownMenuItem = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, onClick, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & { disabled?: boolean }
+>(({ className, onClick, disabled, ...props }, ref) => {
   const ctx = React.useContext(DropdownContext);
   const handle = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (disabled) {
+      e.stopPropagation();
+      return;
+    }
     onClick?.(e);
-    // Cerrar después de acción
     ctx?.setOpen(false);
   };
   return (
@@ -107,9 +110,13 @@ const DropdownMenuItem = React.forwardRef<
       ref={ref}
       onClick={handle}
       className={cn(
-        "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-gray-700 focus:bg-gray-700",
+        "relative flex select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
+        disabled
+          ? "cursor-not-allowed opacity-50"
+          : "cursor-pointer hover:bg-gray-700 focus:bg-gray-700",
         className
       )}
+      aria-disabled={disabled || undefined}
       {...props}
     />
   );
