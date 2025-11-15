@@ -27,7 +27,8 @@ class CancionListCreateView(generics.ListCreateAPIView):
         genre = None
         if genre_name:
             genre, _ = Genero.objects.get_or_create(name=genre_name)
-        serializer.save(uploaded_by=user, genre=genre)
+        # Usar uploaded_by_id para compatibilidad cuando request.user es TokenUser (SimpleJWT)
+        serializer.save(uploaded_by_id=getattr(user, 'id', None), genre=genre)
 
 
 class CancionRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
@@ -130,7 +131,7 @@ class GeneroListView(generics.ListAPIView):
 @permission_classes([permissions.IsAuthenticated])
 def listar_favoritos(request):
     """Lista todas las canciones favoritas del usuario autenticado"""
-    favoritos = CancionFavorita.objects.filter(usuario=request.user).select_related('cancion')
+    favoritos = CancionFavorita.objects.filter(usuario_id=getattr(request.user, 'id', None)).select_related('cancion')
     canciones = [fav.cancion for fav in favoritos]
     serializer = CancionSerializer(canciones, many=True, context={'request': request})
     return Response(serializer.data)
@@ -142,7 +143,7 @@ def agregar_favorito(request, cancion_id):
     """Agrega una canción a favoritos"""
     cancion = get_object_or_404(Cancion, pk=cancion_id)
     favorito, created = CancionFavorita.objects.get_or_create(
-        usuario=request.user,
+        usuario_id=getattr(request.user, 'id', None),
         cancion=cancion
     )
     if created:
@@ -155,7 +156,7 @@ def agregar_favorito(request, cancion_id):
 def quitar_favorito(request, cancion_id):
     """Quita una canción de favoritos"""
     try:
-        favorito = CancionFavorita.objects.get(usuario=request.user, cancion_id=cancion_id)
+        favorito = CancionFavorita.objects.get(usuario_id=getattr(request.user, 'id', None), cancion_id=cancion_id)
         favorito.delete()
         return Response({'message': 'Canción quitada de favoritos'}, status=status.HTTP_200_OK)
     except CancionFavorita.DoesNotExist:
@@ -166,7 +167,7 @@ def quitar_favorito(request, cancion_id):
 @permission_classes([permissions.IsAuthenticated])
 def verificar_favorito(request, cancion_id):
     """Verifica si una canción está en favoritos"""
-    es_favorito = CancionFavorita.objects.filter(usuario=request.user, cancion_id=cancion_id).exists()
+    es_favorito = CancionFavorita.objects.filter(usuario_id=getattr(request.user, 'id', None), cancion_id=cancion_id).exists()
     return Response({'is_favorite': es_favorito})
 
 
@@ -176,7 +177,7 @@ def verificar_favorito(request, cancion_id):
 @permission_classes([permissions.IsAuthenticated])
 def listar_historial(request):
     """Lista el historial de reproducciones del usuario (últimas 50)"""
-    historial = HistorialReproduccion.objects.filter(usuario=request.user).select_related('cancion')[:50]
+    historial = HistorialReproduccion.objects.filter(usuario_id=getattr(request.user, 'id', None)).select_related('cancion')[:50]
     # Obtener canciones únicas (sin duplicados)
     canciones_ids = []
     canciones_unicas = []
@@ -195,7 +196,7 @@ def registrar_reproduccion(request, cancion_id):
     """Registra una reproducción en el historial"""
     cancion = get_object_or_404(Cancion, pk=cancion_id)
     HistorialReproduccion.objects.create(
-        usuario=request.user,
+        usuario_id=getattr(request.user, 'id', None),
         cancion=cancion
     )
     return Response({'message': 'Reproducción registrada'}, status=status.HTTP_201_CREATED)

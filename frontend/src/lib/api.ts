@@ -400,18 +400,7 @@ export const historyAPI = {
 
 export const playlistsAPI = {
   getAll: async (): Promise<Playlist[]> => {
-    const token = localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/listas/`, {
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Error al obtener playlists');
-    }
-    
-    const data = await response.json();
+    const data = await fetchAPI('/listas/');
     
     // Transformar los datos del backend al formato del frontend
     return data.map((playlist: any) => ({
@@ -431,25 +420,13 @@ export const playlistsAPI = {
     description?: string;
     is_public?: boolean;
   }): Promise<Playlist> => {
-    const token = localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/listas/`, {
+    const playlist = await fetchAPI('/listas/', {
       method: 'POST',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({
         name: data.name,
         is_public: data.is_public || false,
       }),
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Error al crear playlist');
-    }
-    
-    const playlist = await response.json();
     
     return {
       id: playlist.id.toString(),
@@ -464,37 +441,17 @@ export const playlistsAPI = {
   },
 
   addSong: async (playlistId: string, songId: string): Promise<void> => {
-    const token = localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/listas/${playlistId}/agregar-cancion/`, {
+    await fetchAPI(`/listas/${playlistId}/agregar-cancion/`, {
       method: 'POST',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ song_id: songId }),
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Error al agregar canción');
-    }
   },
 
   removeSong: async (playlistId: string, songId: string): Promise<void> => {
-    const token = localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/listas/${playlistId}/quitar-cancion/`, {
+    await fetchAPI(`/listas/${playlistId}/quitar-cancion/`, {
       method: 'POST',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ song_id: songId }),
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Error al remover canción');
-    }
   },
 
   update: async (playlistId: string, data: {
@@ -502,22 +459,10 @@ export const playlistsAPI = {
     description?: string;
     is_public?: boolean;
   }): Promise<Playlist> => {
-    const token = localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/listas/${playlistId}/`, {
+    const playlist = await fetchAPI(`/listas/${playlistId}/`, {
       method: 'PATCH',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Error al actualizar playlist');
-    }
-    
-    const playlist = await response.json();
     
     return {
       id: playlist.id.toString(),
@@ -532,18 +477,7 @@ export const playlistsAPI = {
   },
 
   delete: async (playlistId: string): Promise<void> => {
-    const token = localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/listas/${playlistId}/`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-      },
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Error al eliminar playlist');
-    }
+    await fetchAPI(`/listas/${playlistId}/`, { method: 'DELETE' });
   },
 };
 

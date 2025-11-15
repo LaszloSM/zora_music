@@ -34,14 +34,38 @@ const DropdownMenu = ({ children }: { children: React.ReactNode }) => {
 const DropdownMenuTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }
->(({ className, children, asChild, ...props }, ref) => {
+>(({ className, children, asChild, onClick, ...props }, ref) => {
   const ctx = React.useContext(DropdownContext);
-  const toggle = () => ctx?.setOpen(!ctx.open);
-  if (asChild) {
-    return <span onClick={toggle}>{children}</span>;
+  const toggle = (e: React.MouseEvent) => {
+    // Evitar que haga play en filas con onClick
+    e.stopPropagation();
+    ctx?.setOpen(!ctx.open);
+  };
+
+  if (asChild && React.isValidElement(children)) {
+    // Clonar el hijo para combinar handlers y asegurar el toggle
+    const child = children as React.ReactElement<any>;
+    const mergedOnClick = (e: React.MouseEvent<any>) => {
+      // Ejecutar onClick del hijo primero (puede llamar stopPropagation)
+      child.props?.onClick?.(e);
+      // Ejecutar onClick pasado al Trigger si existe
+      onClick?.(e as any);
+      // Aun si el hijo hizo stopPropagation, este handler sigue ejecutándose
+      toggle(e);
+    };
+    return React.cloneElement(child, { onClick: mergedOnClick });
   }
+
   return (
-    <button ref={ref} onClick={toggle} className={cn("inline-flex items-center", className)} {...props}>
+    <button
+      ref={ref}
+      onClick={(e) => {
+        onClick?.(e);
+        toggle(e);
+      }}
+      className={cn("inline-flex items-center", className)}
+      {...props}
+    >
       {children}
     </button>
   );
