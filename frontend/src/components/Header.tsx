@@ -101,7 +101,7 @@ export function Header({ user, onLogout, onSearch, onSearchClick, onProfileClick
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-[#1d2f46]/70 my-2" />
             <DropdownMenuItem 
-              onSelect={() => onSettingsClick?.()}
+              onClick={() => onSettingsClick?.()}
               className="px-4 py-3 text-white font-medium hover:text-white focus:text-white hover:bg-[#132a44]/70 focus:bg-[#132a44]/70 hover:border-[#2c5f7d]/40 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-transparent"
             >
               <Settings className="w-4 h-4 mr-3" />
