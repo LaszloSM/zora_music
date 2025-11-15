@@ -3,7 +3,7 @@ from .views import (
     CookieLoginView, RegisterView, LogoutView, ProfileView,
     ChangePasswordView, RolListCreateView, RolRetrieveUpdateDestroyView,
     UsuarioRolCreateView, HelloFromCookieView, UsuarioListView,
-    UsuarioRetrieveUpdateDestroyView
+    UsuarioRetrieveUpdateDestroyView, AdminSetUserPasswordView
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -19,4 +19,5 @@ urlpatterns = [
     path('roles/asignar-rol/', UsuarioRolCreateView.as_view(), name='usuario_rol_create'),
     path('usuarios/', UsuarioListView.as_view(), name='usuario_list'),
     path('usuarios/<int:pk>/', UsuarioRetrieveUpdateDestroyView.as_view(), name='usuario_detail'),
+    path('usuarios/<int:pk>/set-password/', AdminSetUserPasswordView.as_view(), name='usuario_set_password'),
 ]

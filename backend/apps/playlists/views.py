@@ -12,7 +12,10 @@ class PlaylistListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Playlist.objects.filter(user=self.request.user)
+        return Playlist.objects.filter(user=self.request.user).prefetch_related(
+            'songs__uploaded_by',
+            'songs__genre'
+        )
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -21,7 +24,12 @@ class PlaylistListCreateView(generics.ListCreateAPIView):
 class PlaylistRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PlaylistSerializer
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Playlist.objects.all()
+
+    def get_queryset(self):
+        return Playlist.objects.all().prefetch_related(
+            'songs__uploaded_by',
+            'songs__genre'
+        )
 
     def get_object(self):
         obj = super().get_object()
@@ -37,9 +45,11 @@ def agregar_cancion_a_lista(request, pk):
     song_id = request.data.get('song_id')
     if not song_id:
         return Response({'detail': 'song_id requerido'}, status=status.HTTP_400_BAD_REQUEST)
-    song = get_object_or_404(Song, pk=song_id)
+    song = get_object_or_404(Cancion, pk=song_id)
     playlist.songs.add(song)
-    return Response({'detail': 'Canción añadida a la lista'}, status=status.HTTP_200_OK)
+    # Retornar el playlist actualizado
+    serializer = PlaylistSerializer(playlist, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -49,9 +59,11 @@ def quitar_cancion_de_lista(request, pk):
     song_id = request.data.get('song_id')
     if not song_id:
         return Response({'detail': 'song_id requerido'}, status=status.HTTP_400_BAD_REQUEST)
-    song = get_object_or_404(Song, pk=song_id)
+    song = get_object_or_404(Cancion, pk=song_id)
     playlist.songs.remove(song)
-    return Response({'detail': 'Canción removida de la lista'}, status=status.HTTP_200_OK)
+    # Retornar el playlist actualizado
+    serializer = PlaylistSerializer(playlist, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class FavoriteListCreateView(generics.ListCreateAPIView):

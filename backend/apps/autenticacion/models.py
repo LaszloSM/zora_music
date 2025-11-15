@@ -85,9 +85,21 @@ class RecursoRol(models.Model):
 
 
 class Usuario(AbstractUser):
+    # Sobrescribir username para permitir espacios y caracteres especiales para artistas
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        help_text='Requerido. 150 caracteres o menos. Puede contener espacios para artistas.',
+        validators=[],  # Removemos los validadores por defecto de Django
+        error_messages={
+            'unique': "Ya existe un usuario con ese nombre.",
+        },
+    )
+    
     rol = models.ForeignKey(Rol, on_delete=models.SET_NULL, null=True, blank=True)
     nombres = models.CharField(max_length=45, verbose_name="Nombres", help_text="Nombres del usuario")
     apellidos = models.CharField(max_length=45, verbose_name="Apellidos", help_text="Apellidos del usuario")
+    nombre_artistico = models.CharField(max_length=100, verbose_name="Nombre Artístico", help_text="Nombre artístico para artistas", blank=True, null=True)
     telefono = models.CharField(max_length=15, verbose_name="Teléfono", help_text="Número de contacto del usuario", blank=True, null=True)
     direccion = models.CharField(max_length=255, verbose_name="Dirección", help_text="Dirección del usuario", blank=True, null=True)
     fecha_nacimiento = models.DateField(verbose_name="Fecha de nacimiento", null=True, blank=True)

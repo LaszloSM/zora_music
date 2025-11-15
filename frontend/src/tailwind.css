@@ -1,0 +1,22 @@
+@import './styles/globals.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  body { font-family: ui-sans-serif, system-ui, sans-serif; }
+}
+
+@layer components {
+  .btn-gradient {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-[#042031] shadow-lg shadow-[#0b2740]/35 transition-all duration-300;
+    background: linear-gradient(135deg,#4A9FB8 0%,#5BC0DE 50%,#6DD0F0 100%);
+  }
+  .btn-gradient:hover { @apply scale-[1.03]; }
+}
+
+@layer utilities {
+  .text-gradient-cyan { background: linear-gradient(90deg,#4A9FB8,#5BC0DE,#6DD0F0); -webkit-background-clip:text; color:transparent; }
+}

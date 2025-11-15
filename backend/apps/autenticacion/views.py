@@ -4,6 +4,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import JSONParser
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -264,9 +265,29 @@ class AdminSetUserPasswordView(APIView):
 
 # INICIAR SESION
 class CookieLoginView(APIView):
+    parser_classes = [JSONParser]
+    
     def post(self, request):
-        email = request.data.get("email")
-        password = request.data.get("password")
+        # Debug logging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"request.data type: {type(request.data)}")
+        logger.error(f"request.data content: {request.data}")
+        logger.error(f"request.content_type: {request.content_type}")
+        
+        # Asegurar que request.data es un diccionario
+        try:
+            if isinstance(request.data, str):
+                import json
+                data = json.loads(request.data)
+            else:
+                data = request.data
+        except (json.JSONDecodeError, AttributeError) as e:
+            logger.error(f"Error parsing data: {e}")
+            return Response({"detail": f"Formato de datos inválido: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = data.get("email")
+        password = data.get("password")
 
         # Primero buscamos al usuario por email
         try:

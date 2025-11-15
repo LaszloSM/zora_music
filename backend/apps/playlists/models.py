@@ -5,6 +5,7 @@ from apps.musica.models import Cancion
 
 class Playlist(models.Model):
     name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default='')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='playlists')
     songs = models.ManyToManyField(Cancion, blank=True, related_name='in_playlists')
     is_public = models.BooleanField(default=False)
