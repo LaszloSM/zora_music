@@ -177,7 +177,7 @@ export const songsAPI = {
     duration: typeof cancion.duration === 'number' ? cancion.duration : 0,
     genre: cancion.genre?.name || 'Varios',
     coverUrl: cancion.cover_url
-      ? `https://zora-music-1.onrender.com$${
+      ? `https://zora-music-1.onrender.com${
           cancion.cover_url.replace(/^https?:\/\/[^/]+/, '')
             .startsWith('/')
             ? cancion.cover_url.replace(/^https?:\/\/[^/]+/, '')
@@ -186,7 +186,7 @@ export const songsAPI = {
               : `/media/portadas/new/${cancion.cover_url}`
         }`
       : cancion.album?.cover_url
-      ? `https://zora-music-1.onrender.com$${
+      ? `https://zora-music-1.onrender.com${
           cancion.album.cover_url.replace(/^https?:\/\/[^/]+/, '')
             .startsWith('/')
             ? cancion.album.cover_url.replace(/^https?:\/\/[^/]+/, '')
@@ -429,7 +429,7 @@ export const playlistsAPI = {
       description: playlist.description || playlist.name,
       userId: playlist.user.toString(),
       coverUrl: playlist.songs?.[0]?.cover_url
-        ? `https://zora-music-1.onrender.com$${
+        ? `https://zora-music-1.onrender.com${
             playlist.songs[0].cover_url.replace(/^https?:\/\/[^/]+/, '')
               .startsWith('/')
               ? playlist.songs[0].cover_url.replace(/^https?:\/\/[^/]+/, '')
