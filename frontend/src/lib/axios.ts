@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = 'http://localhost:8000/api';
+const baseURL = 'https://zora-music.onrender.com/api';
 
 export const axiosInstance = axios.create({
   baseURL,
