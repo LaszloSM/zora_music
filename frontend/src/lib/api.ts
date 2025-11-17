@@ -477,16 +477,8 @@ export const playlistsAPI = {
       name: playlist.name,
       description: playlist.description || playlist.name,
       userId: playlist.user.toString(),
-      coverUrl: playlist.songs?.[0]?.cover_url?.startsWith('http')
-        ? playlist.songs[0].cover_url
-        : playlist.songs?.[0]?.cover_url
-        ? `https://zora-music-1.onrender.com${
-            playlist.songs[0].cover_url.startsWith('/')
-              ? playlist.songs[0].cover_url
-              : playlist.songs[0].cover_url.includes('/')
-                ? `/media/portadas/${playlist.songs[0].cover_url}`
-                : `/media/portadas/new/${playlist.songs[0].cover_url}`
-          }`
+      coverUrl: playlist.songs?.[0]?.cover_url
+        ? `https://zora-music-media.onrender.com/portadas/new/${playlist.songs[0].cover_url.split('/').pop()}`
         : 'https://via.placeholder.com/300',
       songs: playlist.songs?.map((cancion: any) => songsAPI.mapBackendSong(cancion)) || [],
       isPublic: playlist.is_public,
