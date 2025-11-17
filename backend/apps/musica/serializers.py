@@ -2,6 +2,9 @@ from rest_framework import serializers
 from django.urls import reverse
 
 from .models import Album, Cancion, Genero, CancionFavorita, HistorialReproduccion
+
+# Dominio del static site para archivos media
+STATIC_MEDIA_DOMAIN = "https://zora-music-media.onrender.com"
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -37,9 +40,21 @@ class AlbumSerializer(serializers.ModelSerializer):
         read_only_fields = ['artist']
 
     def get_cover_url(self, obj):
-        request = self.context.get('request')
         if obj.cover and hasattr(obj.cover, 'url'):
-            return request.build_absolute_uri(obj.cover.url) if request else obj.cover.url
+            url = obj.cover.url
+            # Si la URL es absoluta, extrae solo la ruta a partir de /portadas/...
+            if url.startswith("http"):
+                # Busca la ruta /portadas/...
+                idx = url.find("/portadas/")
+                if idx != -1:
+                    path = url[idx:]
+                    return f"{STATIC_MEDIA_DOMAIN}{path}"
+                else:
+                    # Si no encuentra /portadas/, usa la ruta completa después del dominio
+                    path = "/" + url.split("/", 3)[-1].split("/", 1)[-1]
+                    return f"{STATIC_MEDIA_DOMAIN}{path}"
+            # Si es relativa, construye la URL completa
+            return f"{STATIC_MEDIA_DOMAIN}{url}"
         return None
 
 
@@ -60,11 +75,17 @@ class CancionSerializer(serializers.ModelSerializer):
         read_only_fields = ['uploaded_by', 'play_count', 'created_at', 'cover_url', 'audio_url', 'is_favorite', 'album']
 
     def get_cover_url(self, obj):
-        request = self.context.get('request')
         if obj.cover and hasattr(obj.cover, 'url'):
-            if request:
-                return request.build_absolute_uri(obj.cover.url)
-            return obj.cover.url
+            url = obj.cover.url
+            if url.startswith("http"):
+                idx = url.find("/portadas/")
+                if idx != -1:
+                    path = url[idx:]
+                    return f"{STATIC_MEDIA_DOMAIN}{path}"
+                else:
+                    path = "/" + url.split("/", 3)[-1].split("/", 1)[-1]
+                    return f"{STATIC_MEDIA_DOMAIN}{path}"
+            return f"{STATIC_MEDIA_DOMAIN}{url}"
         return None
 
     def get_audio_url(self, obj):
