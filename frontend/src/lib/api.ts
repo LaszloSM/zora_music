@@ -176,7 +176,15 @@ export const songsAPI = {
     albumName: cancion.album?.title ?? 'Single',
     duration: typeof cancion.duration === 'number' ? cancion.duration : 0,
     genre: cancion.genre?.name || 'Varios',
-    coverUrl: cancion.cover_url || cancion.album?.cover_url || 'https://via.placeholder.com/300',
+    coverUrl: cancion.cover_url?.startsWith('http')
+      ? cancion.cover_url
+      : cancion.cover_url
+        ? `https://zora-music.onrender.com${cancion.cover_url}`
+        : cancion.album?.cover_url?.startsWith('http')
+        ? cancion.album.cover_url
+        : cancion.album?.cover_url
+        ? `https://zora-music.onrender.com${cancion.album.cover_url}`
+        : 'https://via.placeholder.com/300',
     audioUrl: cancion.audio_url || '',
     plays: cancion.play_count || 0,
     createdAt: new Date(cancion.created_at),
@@ -410,7 +418,11 @@ export const playlistsAPI = {
       name: playlist.name,
       description: playlist.description || playlist.name,
       userId: playlist.user.toString(),
-      coverUrl: playlist.songs?.[0]?.cover_url || 'https://via.placeholder.com/300',
+      coverUrl: playlist.songs?.[0]?.cover_url?.startsWith('http')
+        ? playlist.songs[0].cover_url
+        : playlist.songs?.[0]?.cover_url
+        ? `https://zora-music.onrender.com${playlist.songs[0].cover_url}`
+        : 'https://via.placeholder.com/300',
       songs: playlist.songs?.map((cancion: any) => songsAPI.mapBackendSong(cancion)) || [],
       isPublic: playlist.is_public,
       createdAt: new Date(playlist.created_at)
@@ -471,7 +483,11 @@ export const playlistsAPI = {
       name: playlist.name,
       description: playlist.description || playlist.name,
       userId: playlist.user.toString(),
-      coverUrl: playlist.songs?.[0]?.cover_url || 'https://via.placeholder.com/300',
+      coverUrl: playlist.songs?.[0]?.cover_url?.startsWith('http')
+        ? playlist.songs[0].cover_url
+        : playlist.songs?.[0]?.cover_url
+        ? `https://zora-music.onrender.com${playlist.songs[0].cover_url}`
+        : 'https://via.placeholder.com/300',
       songs: playlist.songs?.map((cancion: any) => songsAPI.mapBackendSong(cancion)) || [],
       isPublic: playlist.is_public,
       createdAt: new Date(playlist.created_at)
