@@ -179,11 +179,11 @@ export const songsAPI = {
     coverUrl: cancion.cover_url?.startsWith('http')
       ? cancion.cover_url
       : cancion.cover_url
-        ? `https://zora-music.onrender.com${cancion.cover_url}`
+        ? `${API_BASE_URL.replace(/\/api$/, '')}${cancion.cover_url}`
         : cancion.album?.cover_url?.startsWith('http')
         ? cancion.album.cover_url
         : cancion.album?.cover_url
-        ? `https://zora-music.onrender.com${cancion.album.cover_url}`
+        ? `${API_BASE_URL.replace(/\/api$/, '')}${cancion.album.cover_url}`
         : 'https://via.placeholder.com/300',
     audioUrl: cancion.audio_url || '',
     plays: cancion.play_count || 0,
@@ -421,7 +421,7 @@ export const playlistsAPI = {
       coverUrl: playlist.songs?.[0]?.cover_url?.startsWith('http')
         ? playlist.songs[0].cover_url
         : playlist.songs?.[0]?.cover_url
-        ? `https://zora-music.onrender.com${playlist.songs[0].cover_url}`
+        ? `${API_BASE_URL.replace(/\/api$/, '')}${playlist.songs[0].cover_url}`
         : 'https://via.placeholder.com/300',
       songs: playlist.songs?.map((cancion: any) => songsAPI.mapBackendSong(cancion)) || [],
       isPublic: playlist.is_public,
@@ -486,7 +486,7 @@ export const playlistsAPI = {
       coverUrl: playlist.songs?.[0]?.cover_url?.startsWith('http')
         ? playlist.songs[0].cover_url
         : playlist.songs?.[0]?.cover_url
-        ? `https://zora-music.onrender.com${playlist.songs[0].cover_url}`
+        ? `${API_BASE_URL.replace(/\/api$/, '')}${playlist.songs[0].cover_url}`
         : 'https://via.placeholder.com/300',
       songs: playlist.songs?.map((cancion: any) => songsAPI.mapBackendSong(cancion)) || [],
       isPublic: playlist.is_public,
