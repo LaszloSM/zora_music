@@ -327,7 +327,7 @@ export function AdminDashboard({ songs }: AdminDashboardProps) {
     const loadRoles = async () => {
       try {
         const token = localStorage.getItem('accessToken');
-        const res = await fetch('http://localhost:8000/api/auth/roles/', {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/auth/roles/`, {
           headers: { Authorization: token ? `Bearer ${token}` : '' },
         });
         if (!res.ok) return;
