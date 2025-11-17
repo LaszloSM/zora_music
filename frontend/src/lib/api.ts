@@ -177,22 +177,22 @@ export const songsAPI = {
     duration: typeof cancion.duration === 'number' ? cancion.duration : 0,
     genre: cancion.genre?.name || 'Varios',
     coverUrl: cancion.cover_url
-      ? `https://zora-music-1.onrender.com${
+      ? `https://zora-music-media.onrender.com${
           cancion.cover_url.replace(/^https?:\/\/[^/]+/, '')
             .startsWith('/')
             ? cancion.cover_url.replace(/^https?:\/\/[^/]+/, '')
             : cancion.cover_url.includes('/')
-              ? `/media/portadas/${cancion.cover_url}`
-              : `/media/portadas/new/${cancion.cover_url}`
+              ? `/portadas/${cancion.cover_url}`
+              : `/portadas/new/${cancion.cover_url}`
         }`
       : cancion.album?.cover_url
-      ? `https://zora-music-1.onrender.com${
+      ? `https://zora-music-media.onrender.com${
           cancion.album.cover_url.replace(/^https?:\/\/[^/]+/, '')
             .startsWith('/')
             ? cancion.album.cover_url.replace(/^https?:\/\/[^/]+/, '')
             : cancion.album.cover_url.includes('/')
-              ? `/media/portadas/${cancion.album.cover_url}`
-              : `/media/portadas/new/${cancion.album.cover_url}`
+              ? `/portadas/${cancion.album.cover_url}`
+              : `/portadas/new/${cancion.album.cover_url}`
         }`
       : 'https://via.placeholder.com/300',
     audioUrl: cancion.audio_url || '',
@@ -429,13 +429,13 @@ export const playlistsAPI = {
       description: playlist.description || playlist.name,
       userId: playlist.user.toString(),
       coverUrl: playlist.songs?.[0]?.cover_url
-        ? `https://zora-music-1.onrender.com${
+        ? `https://zora-music-media.onrender.com${
             playlist.songs[0].cover_url.replace(/^https?:\/\/[^/]+/, '')
               .startsWith('/')
               ? playlist.songs[0].cover_url.replace(/^https?:\/\/[^/]+/, '')
               : playlist.songs[0].cover_url.includes('/')
-                ? `/media/portadas/${playlist.songs[0].cover_url}`
-                : `/media/portadas/new/${playlist.songs[0].cover_url}`
+                ? `/portadas/${playlist.songs[0].cover_url}`
+                : `/portadas/new/${playlist.songs[0].cover_url}`
           }`
         : 'https://via.placeholder.com/300',
       songs: playlist.songs?.map((cancion: any) => songsAPI.mapBackendSong(cancion)) || [],
