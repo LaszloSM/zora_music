@@ -42,18 +42,14 @@ class AlbumSerializer(serializers.ModelSerializer):
     def get_cover_url(self, obj):
         if obj.cover and hasattr(obj.cover, 'url'):
             url = obj.cover.url
-            # Si la URL es absoluta, extrae solo la ruta a partir de /portadas/...
-            if url.startswith("http"):
-                # Busca la ruta /portadas/...
-                idx = url.find("/portadas/")
-                if idx != -1:
-                    path = url[idx:]
-                    return f"{STATIC_MEDIA_DOMAIN}{path}"
-                else:
-                    # Si no encuentra /portadas/, usa la ruta completa después del dominio
-                    path = "/" + url.split("/", 3)[-1].split("/", 1)[-1]
-                    return f"{STATIC_MEDIA_DOMAIN}{path}"
-            # Si es relativa, construye la URL completa
+            # Elimina el prefijo /media/ si existe
+            if url.startswith("/media/"):
+                url = url[len("/media"):]
+            elif url.startswith("media/"):
+                url = url[len("media"):]
+            # Asegura que la URL empiece con /
+            if not url.startswith("/"):
+                url = "/" + url
             return f"{STATIC_MEDIA_DOMAIN}{url}"
         return None
 
@@ -77,14 +73,12 @@ class CancionSerializer(serializers.ModelSerializer):
     def get_cover_url(self, obj):
         if obj.cover and hasattr(obj.cover, 'url'):
             url = obj.cover.url
-            if url.startswith("http"):
-                idx = url.find("/portadas/")
-                if idx != -1:
-                    path = url[idx:]
-                    return f"{STATIC_MEDIA_DOMAIN}{path}"
-                else:
-                    path = "/" + url.split("/", 3)[-1].split("/", 1)[-1]
-                    return f"{STATIC_MEDIA_DOMAIN}{path}"
+            if url.startswith("/media/"):
+                url = url[len("/media"):]
+            elif url.startswith("media/"):
+                url = url[len("media"):]
+            if not url.startswith("/"):
+                url = "/" + url
             return f"{STATIC_MEDIA_DOMAIN}{url}"
         return None
 
