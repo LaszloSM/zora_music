@@ -129,7 +129,7 @@ export const authAPI = {
     const authStore = useAuthStore.getState();
     
     // Llamar al método login del store que maneja todo
-    return await authStore.login(email, password);
+    return await authStore.login({ email, password });
   },
 
   register: async (data: {

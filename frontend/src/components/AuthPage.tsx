@@ -1,7 +1,6 @@
 ﻿import { useRef, useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Mail, Lock, User as UserIcon, ArrowLeft } from 'lucide-react';
-import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -39,8 +38,8 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 
     try {
       console.log('Intentando login con:', email);
-      // Llamar usando la firma correcta (email, password) en lugar de pasar objeto
-      await loginStore(email, password);
+      // Llamar usando la firma correcta con objeto
+      await loginStore({ email, password });
       console.log('Login exitoso');
       onLogin?.('listener'); // Callback opcional para compatibilidad
     } catch (err: any) {

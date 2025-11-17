@@ -283,27 +283,7 @@ export function PlayerProvider({ children }: PlayerProviderProps) {
     }
   }, []);
 
-  // Utilidad de fade para transiciones suaves
-  const fadeTo = useCallback(async (target: number, durationMs: number = 150) => {
-    if (!audioRef.current) return;
-    const audio = audioRef.current;
-    const start = audio.volume * 100;
-    const end = Math.max(0, Math.min(100, target));
-    const startTs = performance.now();
-    return new Promise<void>((resolve) => {
-      const step = (now: number) => {
-        const t = Math.min(1, (now - startTs) / durationMs);
-        const val = start + (end - start) * t;
-        audio.volume = val / 100;
-        if (t < 1) {
-          requestAnimationFrame(step);
-        } else {
-          resolve();
-        }
-      };
-      requestAnimationFrame(step);
-    });
-  }, []);
+  // Utilidad de fade para transiciones suaves - removed (was unused)
 
   // Acciones de reproducción
   const play = useCallback(async () => {

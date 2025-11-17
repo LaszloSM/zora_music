@@ -37,7 +37,6 @@ export function SongActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end"
-        sideOffset={8}
         className="w-64 rounded-xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200"
         style={{
           background: 'linear-gradient(135deg, #1A2B42 0%, #0F1E30 100%)',
@@ -101,7 +100,6 @@ export function SongActionsMenu({
                         onAddToPlaylist(playlist.id, song.id);
                       }
                     }}
-                    disabled={isInPlaylist}
                     className={`px-4 py-3 rounded-lg mx-1 my-0.5 transition-all duration-200 border border-transparent ${
                       isInPlaylist 
                         ? 'opacity-50 cursor-not-allowed' 

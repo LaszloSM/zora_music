@@ -28,7 +28,7 @@ interface AuthStore {
   refreshToken: string | null;
   isAuthenticated: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<{ user: User }>;
+  login: (credentials: { username?: string; email?: string; password: string }) => Promise<{ user: User }>;
   logout: () => Promise<void>;
   register: (userData: {
     email: string;
@@ -69,12 +69,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isAuthenticated: !!localStorage.getItem('accessToken'),
   error: null,
 
-  login: async (email: string, password: string) => {
+  login: async (credentials: { username?: string; email?: string; password: string }) => {
     try {
-      const response = await axiosInstance.post<AuthResponse>('/auth/login/', { 
-        email, 
-        password 
-      });
+      const response = await axiosInstance.post<AuthResponse>('/auth/login/', credentials);
       
       const { access, refresh, user } = response.data;
       console.log('Datos recibidos del backend:', response.data);

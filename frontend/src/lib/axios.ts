@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const baseURL = 'https://zora-music.onrender.com/api';
+// Usar la URL de Render en producción o localhost en desarrollo
+const baseURL = import.meta.env.VITE_API_URL || 'https://zora-music.onrender.com/api';
 
 export const axiosInstance = axios.create({
   baseURL,

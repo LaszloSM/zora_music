@@ -61,7 +61,6 @@ export default function App() {
   const [favorites, setFavorites] = useState<Song[]>([]);
   const [isLoadingSongs, setIsLoadingSongs] = useState(true);
   const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(true);
-  const [isLoadingFavorites, setIsLoadingFavorites] = useState(true);
   const [isShuffled, setIsShuffled] = useState(false);
   const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
   const [originalQueue, setOriginalQueue] = useState<Song[]>([]);
@@ -129,14 +128,11 @@ export default function App() {
 
   const loadFavorites = async () => {
     try {
-      setIsLoadingFavorites(true);
       const fetchedFavorites = await favoritesAPI.getAll();
       setFavorites(fetchedFavorites);
     } catch (error) {
       console.error('Error cargando favoritos:', error);
       setFavorites([]);
-    } finally {
-      setIsLoadingFavorites(false);
     }
   };
 

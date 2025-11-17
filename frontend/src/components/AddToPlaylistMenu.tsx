@@ -79,8 +79,7 @@ export function AddToPlaylistMenu({
                   handleAddToPlaylist(playlist.id);
                 }
               }}
-              disabled={isInPlaylist || isAdding}
-              className="cursor-pointer"
+              className={isInPlaylist || isAdding ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
             >
               {isInPlaylist ? (
                 <Check className="w-4 h-4 mr-2 text-[#5BC0DE]" />
@@ -97,7 +96,7 @@ export function AddToPlaylistMenu({
         })}
         
         {playlists.length === 0 && (
-          <DropdownMenuItem disabled>
+          <DropdownMenuItem className="cursor-not-allowed opacity-50">
             <span className="text-sm text-[#B8D4E8]/60">No tienes playlists</span>
           </DropdownMenuItem>
         )}

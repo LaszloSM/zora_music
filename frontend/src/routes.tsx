@@ -1,12 +1,16 @@
+// This file is not used - App.tsx handles all routing
+// Keeping it here for reference only
+
+/*
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './stores/auth';
-import AuthPage from './components/AuthPage';
-import HomePage from './components/HomePage';
-import SearchPage from './components/SearchPage';
-import LibraryPage from './components/LibraryPage';
-import PlaylistDetail from './components/PlaylistDetail';
-import ArtistDashboard from './components/ArtistDashboard';
-import AdminDashboard from './components/AdminDashboard';
+import { AuthPage } from './components/AuthPage';
+import { HomePage } from './components/HomePage';
+import { SearchPage } from './components/SearchPage';
+import { LibraryPage } from './components/LibraryPage';
+import { PlaylistDetail } from './components/PlaylistDetail';
+import { ArtistDashboard } from './components/ArtistDashboard';
+import { AdminDashboard } from './components/AdminDashboard';
 
 function ProtectedRoute({ children, requireRole }: { children: React.ReactNode; requireRole?: string[] }) {
   const { isAuthenticated, user } = useAuthStore();
@@ -15,7 +19,7 @@ function ProtectedRoute({ children, requireRole }: { children: React.ReactNode; 
     return <Navigate to="/auth" replace />;
   }
 
-  if (requireRole && (!user || !requireRole.includes(user.rol))) {
+  if (requireRole && (!user || !requireRole.includes(user.role))) {
     return <Navigate to="/" replace />;
   }
 
@@ -83,3 +87,4 @@ export default function AppRoutes() {
     </Routes>
   );
 }
+*/
