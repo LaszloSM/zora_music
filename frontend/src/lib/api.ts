@@ -176,27 +176,25 @@ export const songsAPI = {
     albumName: cancion.album?.title ?? 'Single',
     duration: typeof cancion.duration === 'number' ? cancion.duration : 0,
     genre: cancion.genre?.name || 'Varios',
-    coverUrl: cancion.cover_url?.startsWith('http')
-      ? cancion.cover_url
-      : cancion.cover_url
-        ? `https://zora-music-1.onrender.com${
-            cancion.cover_url.startsWith('/')
-              ? cancion.cover_url
-              : cancion.cover_url.includes('/')
-                ? `/media/portadas/${cancion.cover_url}`
-                : `/media/portadas/new/${cancion.cover_url}`
-          }`
-        : cancion.album?.cover_url?.startsWith('http')
-        ? cancion.album.cover_url
-        : cancion.album?.cover_url
-        ? `https://zora-music-1.onrender.com${
-            cancion.album.cover_url.startsWith('/')
-              ? cancion.album.cover_url
-              : cancion.album.cover_url.includes('/')
-                ? `/media/portadas/${cancion.album.cover_url}`
-                : `/media/portadas/new/${cancion.album.cover_url}`
-          }`
-        : 'https://via.placeholder.com/300',
+    coverUrl: cancion.cover_url
+      ? `https://zora-music-1.onrender.com$${
+          cancion.cover_url.replace(/^https?:\/\/[^/]+/, '')
+            .startsWith('/')
+            ? cancion.cover_url.replace(/^https?:\/\/[^/]+/, '')
+            : cancion.cover_url.includes('/')
+              ? `/media/portadas/${cancion.cover_url}`
+              : `/media/portadas/new/${cancion.cover_url}`
+        }`
+      : cancion.album?.cover_url
+      ? `https://zora-music-1.onrender.com$${
+          cancion.album.cover_url.replace(/^https?:\/\/[^/]+/, '')
+            .startsWith('/')
+            ? cancion.album.cover_url.replace(/^https?:\/\/[^/]+/, '')
+            : cancion.album.cover_url.includes('/')
+              ? `/media/portadas/${cancion.album.cover_url}`
+              : `/media/portadas/new/${cancion.album.cover_url}`
+        }`
+      : 'https://via.placeholder.com/300',
     audioUrl: cancion.audio_url || '',
     plays: cancion.play_count || 0,
     createdAt: new Date(cancion.created_at),
@@ -430,12 +428,11 @@ export const playlistsAPI = {
       name: playlist.name,
       description: playlist.description || playlist.name,
       userId: playlist.user.toString(),
-      coverUrl: playlist.songs?.[0]?.cover_url?.startsWith('http')
-        ? playlist.songs[0].cover_url
-        : playlist.songs?.[0]?.cover_url
-        ? `https://zora-music-1.onrender.com${
-            playlist.songs[0].cover_url.startsWith('/')
-              ? playlist.songs[0].cover_url
+      coverUrl: playlist.songs?.[0]?.cover_url
+        ? `https://zora-music-1.onrender.com$${
+            playlist.songs[0].cover_url.replace(/^https?:\/\/[^/]+/, '')
+              .startsWith('/')
+              ? playlist.songs[0].cover_url.replace(/^https?:\/\/[^/]+/, '')
               : playlist.songs[0].cover_url.includes('/')
                 ? `/media/portadas/${playlist.songs[0].cover_url}`
                 : `/media/portadas/new/${playlist.songs[0].cover_url}`
