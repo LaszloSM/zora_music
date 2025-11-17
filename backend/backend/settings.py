@@ -114,13 +114,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React Vite
-    "https://zora-music-5fpk.vercel.app",
-]
-CORS_ALLOW_CREDENTIALS = True
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
@@ -186,6 +179,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite default port
     "http://localhost:3000",  # React default port
     "https://zora-music-5fpk.vercel.app"
+]
+# Permitir todos los subdominios de Vercel para preview deployments
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
