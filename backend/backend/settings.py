@@ -111,6 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React Vite
+    "https://zora-music-5fpk.vercel.app",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
