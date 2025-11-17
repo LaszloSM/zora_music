@@ -15,8 +15,7 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      // El store espera (email, password); usamos username como email
-      await login(username, password);
+      await login({ username, password });
       toast.success('¡Bienvenido!');
       navigate('/');
     } catch (error: any) {
